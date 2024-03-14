@@ -1,7 +1,6 @@
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import 'dotenv/config'
-import { MakeDirectoryOptions } from 'fs'
 import { Actions, mediaObj } from './types'
 
 require('dotenv').config()
@@ -18,7 +17,7 @@ app.get('/process', async (c) => {
     })
 })
 
-function processLink(link: String) {
+function processLink(link: string) {
     const domain = getDomain(link);
     // Define actions for each domain
     const actions: Actions = {
@@ -26,13 +25,42 @@ function processLink(link: String) {
             const videoID = extractVideoId(link)
             const res = await fetch("https://youtube.googleapis.com/youtube/v3/videos?part=snippet%2CcontentDetails%2Cstatistics&id=" + videoID + "&key=" + process.env.YOUTUBE_APIKEY)
             const body: any = await res.json();
-            console.log(body)
             const mediaObj: mediaObj = {
                 id: body.items[0].id,
                 title: body.items[0].snippet.title,
-                desc: body.items[0].snippet.description
+                desc: body.items[0].snippet.description,
+                publishedAt: body.items[0].snippet.publishedAt,
+                channelId: body.items[0].snippet.channelId,
+                channelTitle: body.items[0].snippet.channelTitle,
+                thumbnails: {
+                    default: {
+                        url: body.items[0].snippet.thumbnails.default.url,
+                        width: body.items[0].snippet.thumbnails.default.width,
+                        height: body.items[0].snippet.thumbnails.default.height
+                    },
+                    medium: {
+                        url: body.items[0].snippet.thumbnails.medium.url,
+                        width: body.items[0].snippet.thumbnails.medium.width,
+                        height: body.items[0].snippet.thumbnails.medium.height
+                    },
+                    high: {
+                        url: body.items[0].snippet.thumbnails.high.url,
+                        width: body.items[0].snippet.thumbnails.high.width,
+                        height: body.items[0].snippet.thumbnails.high.height
+                    },
+                    standard: {
+                        url: body.items[0].snippet.thumbnails.standard.url,
+                        width: body.items[0].snippet.thumbnails.standard.width,
+                        height: body.items[0].snippet.thumbnails.standard.height
+                    },
+                    maxres: {
+                        url: body.items[0].snippet.thumbnails.maxres.url,
+                        width: body.items[0].snippet.thumbnails.maxres.width,
+                        height: body.items[0].snippet.thumbnails.maxres.height
+                    }
+                },
+                platform: 'youtube'
             }
-
             return mediaObj;
         },
         'tiktok.com': () => {
@@ -46,9 +74,6 @@ function processLink(link: String) {
         // Add more cases as needed
     };
 
-    // // Execute action based on domain or default action
-    // return actions[domain] ? actions[domain]() : console.log("Unknown domain");
-
     // Ensure domain is not null before accessing actions[domain]
     if (domain !== null && actions[domain]) {
         return actions[domain]();
@@ -58,7 +83,7 @@ function processLink(link: String) {
 
 }
 
-const getDomain = (url: String) => {
+const getDomain = (url: string) => {
     const regExp = /^(?:https?:\/\/)?(?:www\.)?([^:/?#]+)(?:.*)/i;
     // Use regex to extract domain from URL
     const match = url.match(regExp);
@@ -66,7 +91,7 @@ const getDomain = (url: String) => {
     return match ? match[1] : null;
 };
 
-function extractVideoId(url: String) {
+function extractVideoId(url: string) {
     // Regular expression to match YouTube video IDs
     const regExp = /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
     // Extract video ID from the URL
