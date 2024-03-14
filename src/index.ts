@@ -1,6 +1,8 @@
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import 'dotenv/config'
+import { MakeDirectoryOptions } from 'fs'
+import { Actions, mediaObj } from './types'
 
 require('dotenv').config()
 
@@ -16,16 +18,16 @@ app.get('/process', async (c) => {
     })
 })
 
-function processLink(link: any) {
+function processLink(link: String) {
     const domain = getDomain(link);
     // Define actions for each domain
-    const actions: any = {
+    const actions: Actions = {
         'youtube.com': async () => {
             const videoID = extractVideoId(link)
             const res = await fetch("https://youtube.googleapis.com/youtube/v3/videos?part=snippet%2CcontentDetails%2Cstatistics&id=" + videoID + "&key=" + process.env.YOUTUBE_APIKEY)
             const body: any = await res.json();
             console.log(body)
-            const mediaObj = {
+            const mediaObj: mediaObj = {
                 id: body.items[0].id,
                 title: body.items[0].snippet.title,
                 desc: body.items[0].snippet.description
@@ -44,11 +46,19 @@ function processLink(link: any) {
         // Add more cases as needed
     };
 
-    // Execute action based on domain or default action
-    return actions[domain] ? actions[domain]() : console.log("Unknown domain");
+    // // Execute action based on domain or default action
+    // return actions[domain] ? actions[domain]() : console.log("Unknown domain");
+
+    // Ensure domain is not null before accessing actions[domain]
+    if (domain !== null && actions[domain]) {
+        return actions[domain]();
+    } else {
+        return console.log("Unknown domain");
+    }
+
 }
 
-const getDomain = (url: any) => {
+const getDomain = (url: String) => {
     const regExp = /^(?:https?:\/\/)?(?:www\.)?([^:/?#]+)(?:.*)/i;
     // Use regex to extract domain from URL
     const match = url.match(regExp);
@@ -56,7 +66,7 @@ const getDomain = (url: any) => {
     return match ? match[1] : null;
 };
 
-function extractVideoId(url: string) {
+function extractVideoId(url: String) {
     // Regular expression to match YouTube video IDs
     const regExp = /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
     // Extract video ID from the URL
