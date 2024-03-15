@@ -37,26 +37,6 @@ function processLink(link: string) {
                         url: body.items[0].snippet.thumbnails.default.url,
                         width: body.items[0].snippet.thumbnails.default.width,
                         height: body.items[0].snippet.thumbnails.default.height
-                    },
-                    medium: {
-                        url: body.items[0].snippet.thumbnails.medium.url,
-                        width: body.items[0].snippet.thumbnails.medium.width,
-                        height: body.items[0].snippet.thumbnails.medium.height
-                    },
-                    high: {
-                        url: body.items[0].snippet.thumbnails.high.url,
-                        width: body.items[0].snippet.thumbnails.high.width,
-                        height: body.items[0].snippet.thumbnails.high.height
-                    },
-                    standard: {
-                        url: body.items[0].snippet.thumbnails.standard.url,
-                        width: body.items[0].snippet.thumbnails.standard.width,
-                        height: body.items[0].snippet.thumbnails.standard.height
-                    },
-                    maxres: {
-                        url: body.items[0].snippet.thumbnails.maxres.url,
-                        width: body.items[0].snippet.thumbnails.maxres.width,
-                        height: body.items[0].snippet.thumbnails.maxres.height
                     }
                 },
                 platform: 'youtube'
