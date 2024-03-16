@@ -2,6 +2,8 @@ import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import 'dotenv/config'
 import { Actions, mediaObj } from './types'
+import db from './db/db'
+import { media } from './db/schema'
 
 require('dotenv').config()
 
@@ -29,7 +31,7 @@ function processLink(link: string) {
                 id: body.items[0].id,
                 title: body.items[0].snippet.title,
                 desc: body.items[0].snippet.description,
-                publishedAt: body.items[0].snippet.publishedAt,
+                uploadDate: body.items[0].snippet.publishedAt,
                 channelId: body.items[0].snippet.channelId,
                 channelTitle: body.items[0].snippet.channelTitle,
                 thumbnails: {
@@ -41,6 +43,17 @@ function processLink(link: string) {
                 },
                 platform: 'youtube'
             }
+
+            await db.insert(media).values({
+                id: mediaObj.channelId,
+                title: mediaObj.title,
+                desc: mediaObj.desc,
+                uploadDate: mediaObj.uploadDate,
+                channelId: mediaObj.channelId,
+                channelTitle: mediaObj.channelTitle,
+                thumbnails: mediaObj.thumbnails,
+                platform: mediaObj.platform
+            })
             return mediaObj;
         },
         'tiktok.com': () => {

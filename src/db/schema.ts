@@ -1,10 +1,10 @@
-import { pgTable, serial, text, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, jsonb } from "drizzle-orm/pg-core";
 
 export const media = pgTable('media', {
-    id: serial('id').primaryKey(),
+    id: text('id').primaryKey(),
     title: text('title'),
     desc: text('desc'),
-    publishedAt: text('publishedAt'),
+    uploadDate: text('uploadDate'),
     channelId: text('channelId'),
     channelTitle: text('channelTitle'),
     thumbnails: jsonb('thumbnails'),

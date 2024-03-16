@@ -2,7 +2,7 @@ export interface mediaObj {
     id: string
     title: string
     desc: string
-    publishedAt: string;
+    uploadDate: string;
     channelId: string;
     channelTitle: string;
     thumbnails?: Thumbnails;
