@@ -1,4 +1,5 @@
-import { pgTable, text, jsonb } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
+import { pgTable, text, jsonb, date, timestamp } from "drizzle-orm/pg-core";
 
 export const media = pgTable('media', {
     id: text('id').primaryKey(),
@@ -8,6 +9,7 @@ export const media = pgTable('media', {
     channelId: text('channelId'),
     channelTitle: text('channelTitle'),
     thumbnails: jsonb('thumbnails'),
-    tags: text('publishedAt'),
+    tags: text('tags'),
     platform: text('platform'),
+    createdAt: timestamp("createdAt").notNull().default(sql`CURRENT_TIMESTAMP`)
 });

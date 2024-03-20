@@ -1,11 +1,8 @@
 import { Hono } from 'hono'
-import 'dotenv/config'
 import { Actions, mediaObj } from '../types'
 import db from '../db/db'
 import { media } from '../db/schema'
 import { eq } from 'drizzle-orm'
-
-require('dotenv').config()
 
 export const processRoute = new Hono()
 

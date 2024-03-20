@@ -1,8 +1,9 @@
+import 'dotenv/config'
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { mediaRoute } from './routes/media'
 import { processRoute } from './routes/process'
-
+require('dotenv').config()
 
 const app = new Hono()
 app.get('/', (c) => c.json({ message: "hello" }))
