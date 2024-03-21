@@ -22,7 +22,7 @@ function processLink(link: string) {
             const videoID: any = extractVideoId(link)
             const existingItem = await searchVideoID(videoID)
             if (existingItem.length > 0) {
-                return existingItem
+                return { existing: true, item: existingItem[0] }
             } else {
                 const res = await fetch("https://youtube.googleapis.com/youtube/v3/videos?part=snippet%2CcontentDetails%2Cstatistics&id=" + videoID + "&key=" + process.env.YOUTUBE_APIKEY)
                 const body: any = await res.json();
@@ -52,7 +52,7 @@ function processLink(link: string) {
                     thumbnails: mediaObj.thumbnails,
                     platform: mediaObj.platform
                 })
-                return mediaObj;
+                return { existing: false, item: mediaObj }
             }
 
         },
