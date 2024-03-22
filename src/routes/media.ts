@@ -1,5 +1,7 @@
 import { Hono } from "hono";
 import db from "../db/db";
+import { eq } from "drizzle-orm";
+import { media } from "../db/schema";
 
 export const mediaRoute = new Hono()
 
@@ -20,4 +22,23 @@ mediaRoute.get('/', async (c) => {
         c.status(500)
         return c.body('Internal Server Error')
     }
+})
+
+mediaRoute.get('/:id', async (c) => {
+    try {
+        const { id } = c.req.param()
+        const result = await db.query.media.findFirst({
+            where: eq(media.id, id)
+        })
+        console.log(result)
+
+        if (!result) {
+            return c.json({ error: 'Resource not found' });
+        }
+        return c.json(result)
+    } catch (error) {
+        console.error(error);
+        return c.json({ error: 'Internal server error' });
+    }
+
 })
