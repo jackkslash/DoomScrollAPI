@@ -1,7 +1,8 @@
 import { Hono } from "hono";
 import db from "../db/db";
 import { eq } from "drizzle-orm";
-import { media } from "../db/schema";
+import { media, review } from "../db/schema";
+import { v4 as uuidv4 } from 'uuid';
 
 export const mediaRoute = new Hono()
 
@@ -41,4 +42,24 @@ mediaRoute.get('/:id', async (c) => {
         return c.json({ error: 'Internal server error' });
     }
 
+})
+
+mediaRoute.post('/:id/review', async (c) => {
+    try {
+        const uuid = uuidv4();
+        const { id } = c.req.param()
+        const { r, rating } = await c.req.json()
+        await db.insert(review).values({
+            id: uuid,
+            mediaId: id,
+            userId: "test",
+            rating: rating,
+            comment: r
+
+        })
+        return c.json({ uuid, r, rating, id })
+    } catch (error) {
+        console.error(error);
+        return c.json({ error: 'Internal server error' });
+    }
 })
