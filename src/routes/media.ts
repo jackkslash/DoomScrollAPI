@@ -47,15 +47,15 @@ mediaRoute.get('/:id', async (c) => {
 mediaRoute.post('/:id/review', async (c) => {
     try {
         const uuid = uuidv4();
-        const { id } = c.req.param()
-        const { r, rating } = await c.req.json()
+        const { id } = await c.req.param()
+        const { r, rating, userID } = await c.req.json()
+        console.log(id, r, rating)
         await db.insert(review).values({
             id: uuid,
             mediaId: id,
-            userId: "test",
+            userId: userID,
             rating: rating,
             comment: r
-
         })
         return c.json({ uuid, r, rating, id })
     } catch (error) {
