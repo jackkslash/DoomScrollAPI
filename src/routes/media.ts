@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import db from "../db/db";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { media, review } from "../db/schema";
 import { v4 as uuidv4 } from 'uuid';
 
@@ -17,7 +17,7 @@ mediaRoute.get('/', async (c) => {
         });
         console.log(req)
         return c.json(req)
-        // Process req as needed
+
     } catch (error) {
         console.error('Error fetching media:', error);
         c.status(500)
@@ -58,6 +58,30 @@ mediaRoute.post('/:id/review', async (c) => {
             comment: r
         })
         return c.json({ uuid, r, rating, id })
+    } catch (error) {
+        console.error(error);
+        return c.json({ error: 'Internal server error' });
+    }
+})
+
+mediaRoute.get('/:id/review', async (c) => {
+    try {
+        const { id } = await c.req.param()
+        const req = await db.query.review.findMany({
+            where: eq(review.mediaId, id),
+            orderBy: [desc(review.createdAt)]
+        })
+
+        const formattedReviews = req.map(review => ({
+            id: review.id,
+            mediaId: review.mediaId,
+            userId: review.userId,
+            rating: review.rating,
+            comment: review.comment,
+            createdAt: review.createdAt
+        }));
+
+        return c.json(formattedReviews)
     } catch (error) {
         console.error(error);
         return c.json({ error: 'Internal server error' });
