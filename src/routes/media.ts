@@ -87,3 +87,18 @@ mediaRoute.get('/:id/review', async (c) => {
         return c.json({ error: 'Internal server error' });
     }
 })
+
+mediaRoute.get('/review/:userID', async (c) => {
+    try {
+        const { userID } = await c.req.param()
+        const r = await db.select()
+            .from(review)
+            .fullJoin(media, eq(review.mediaId, media.id))
+            .where(eq(review.userId, userID))
+
+        return c.json(r)
+    } catch (error) {
+        console.error(error);
+        return c.json({ error: 'Internal server error' });
+    }
+})
