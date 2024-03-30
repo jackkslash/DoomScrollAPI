@@ -4,6 +4,8 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors';
 import { mediaRoute } from './routes/media'
 import { processRoute } from './routes/process'
+import { profileRoute } from './routes/profile';
+
 require('dotenv').config()
 
 const app = new Hono()
@@ -14,6 +16,7 @@ app.use('*', cors({
 app.get('/', (c) => c.json({ message: "hello" }))
 app.route('/process', processRoute)
 app.route('/media', mediaRoute)
+app.route('/profile', profileRoute)
 app.notFound((c) => c.json({ message: "Not a valid API route." }, 404));
 
 serve(app)

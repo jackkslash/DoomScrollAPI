@@ -1,6 +1,13 @@
 import { sql } from "drizzle-orm";
 import { pgTable, text, jsonb, timestamp, integer, uuid } from "drizzle-orm/pg-core";
 
+export const profile = pgTable('profile', {
+    id: uuid('id').primaryKey(),
+    userId: text('userId').notNull().unique(),
+    username: text('username').notNull(),
+});
+
+
 export const media = pgTable('media', {
     id: text('id').primaryKey(),
     title: text('title'),
@@ -17,8 +24,8 @@ export const media = pgTable('media', {
 export const review = pgTable('review', {
     id: uuid('id').primaryKey(),
     mediaId: text('mediaId').references(() => media.id).notNull(),
-    userId: text('userId').notNull(), // Assuming userId is a foreign key referencing the users table
-    rating: integer('rating').notNull(), // Assuming rating is an integer value
+    userId: text('userId').references(() => profile.userId).notNull(),
+    rating: integer('rating').notNull(),
     comment: text('comment'),
     createdAt: timestamp("createdAt").notNull().default(sql`CURRENT_TIMESTAMP`)
 });
