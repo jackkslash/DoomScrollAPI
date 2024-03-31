@@ -44,3 +44,17 @@ profileRoute.post('/:id', async (c) => {
 
 })
 
+profileRoute.post('/:id', async (c) => {
+    try {
+        const { id } = c.req.param()
+        const username = c.req.query('username') as string
+        const result = await db.update(profile).set({
+            username: username
+        }).where(eq(profile.userId, id))
+        console.log(result)
+        return c.json({ success: 'Profile updated' })
+    } catch (error) {
+        console.error(error);
+        return c.json({ error: 'Internal server error' });
+    }
+})
