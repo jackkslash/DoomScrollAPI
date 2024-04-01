@@ -3,7 +3,7 @@ import { pgTable, text, jsonb, timestamp, integer, uuid } from "drizzle-orm/pg-c
 
 export const profile = pgTable('profile', {
     id: uuid('id').primaryKey(),
-    userId: text('userId').notNull().unique(),
+    userId: uuid('userId').notNull().unique(),
     username: text('username').notNull(),
 });
 
