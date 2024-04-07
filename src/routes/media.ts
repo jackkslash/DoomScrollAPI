@@ -1,8 +1,9 @@
 import { Hono } from "hono";
 import db from "../db/db";
 import { desc, eq } from "drizzle-orm";
-import { media, review } from "../db/schema";
+import { media, review, profile } from "../db/schema";
 import { v4 as uuidv4 } from 'uuid';
+
 
 export const mediaRoute = new Hono()
 
@@ -44,44 +45,39 @@ mediaRoute.get('/:id', async (c) => {
 
 })
 
-mediaRoute.post('/:id/review', async (c) => {
+mediaRoute.post('/:mediaId/review', async (c) => {
     try {
         const uuid = uuidv4();
-        const { id } = await c.req.param()
+        const { mediaId } = await c.req.param()
         const { r, rating, userID } = await c.req.json()
-        console.log(id, r, rating)
+        console.log(mediaId, r, rating)
         await db.insert(review).values({
             id: uuid,
-            mediaId: id,
+            mediaId: mediaId,
             userId: userID,
             rating: rating,
             comment: r
         })
-        return c.json({ uuid, r, rating, id })
+        return c.json({ uuid, r, rating, mediaId })
     } catch (error) {
         console.error(error);
         return c.json({ error: 'Internal server error' });
     }
 })
 
-mediaRoute.get('/:id/review', async (c) => {
+mediaRoute.get('/:mediaId/review', async (c) => {
     try {
-        const { id } = await c.req.param()
-        const req = await db.query.review.findMany({
-            where: eq(review.mediaId, id),
-            orderBy: [desc(review.createdAt)]
-        })
-
-        const formattedReviews = req.map(review => ({
-            id: review.id,
-            mediaId: review.mediaId,
-            userId: review.userId,
-            rating: review.rating,
-            comment: review.comment,
-            createdAt: review.createdAt
-        }));
-
-        return c.json(formattedReviews)
+        const { mediaId } = await c.req.param()
+        const req = await db.select({
+            reviewComment: review.comment,
+            reviewRating: review.rating,
+            profileUsername: profile.username,
+            profileID: profile.userId
+        }).from(review)
+            .where(eq(review.mediaId, mediaId))
+            .fullJoin(profile, eq(review.userId, profile.userId))
+            .orderBy(desc(review.createdAt)).limit(10)
+        return c.json(req)
     } catch (error) {
         console.error(error);
         return c.json({ error: 'Internal server error' });
@@ -95,7 +91,6 @@ mediaRoute.get('/review/:userID', async (c) => {
             .from(review)
             .fullJoin(media, eq(review.mediaId, media.id))
             .where(eq(review.userId, userID))
-
         return c.json(r)
     } catch (error) {
         console.error(error);
