@@ -71,12 +71,17 @@ mediaRoute.get('/:mediaId/review', async (c) => {
         const req = await db.select({
             reviewComment: review.comment,
             reviewRating: review.rating,
+            reviewDate: review.createdAt,
             profileUsername: profile.username,
-            profileID: profile.userId
+            profileID: profile.userId,
+            mediaTitle: media.title,
+            mediaDesc: media.desc,
         }).from(review)
             .where(eq(review.mediaId, mediaId))
             .fullJoin(profile, eq(review.userId, profile.userId))
-            .orderBy(desc(review.createdAt)).limit(10)
+            .fullJoin(media, eq(review.mediaId, media.id))
+            .orderBy(desc(review.createdAt))
+            .limit(10)
         return c.json(req)
     } catch (error) {
         console.error(error);
@@ -87,10 +92,20 @@ mediaRoute.get('/:mediaId/review', async (c) => {
 mediaRoute.get('/review/:userID', async (c) => {
     try {
         const { userID } = await c.req.param()
-        const r = await db.select()
+        const r = await db.select({
+            reviewComment: review.comment,
+            reviewRating: review.rating,
+            reviewDate: review.createdAt,
+            profileUsername: profile.username,
+            profileID: profile.userId,
+            mediaTitle: media.title,
+            mediaDesc: media.desc,
+        })
             .from(review)
+            .fullJoin(profile, eq(review.userId, profile.userId))
             .fullJoin(media, eq(review.mediaId, media.id))
             .where(eq(review.userId, userID))
+            .limit(10)
         return c.json(r)
     } catch (error) {
         console.error(error);
