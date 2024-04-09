@@ -67,6 +67,9 @@ mediaRoute.post('/:mediaId/review', async (c) => {
 
 mediaRoute.get('/:mediaId/review', async (c) => {
     try {
+        const limit = parseInt(c.req.query('limit') as string, 10) || 50;
+        const offset = parseInt(c.req.query('offset') as string, 10) || 0;
+
         const { mediaId } = await c.req.param()
         const req = await db.select({
             reviewComment: review.comment,
@@ -81,7 +84,8 @@ mediaRoute.get('/:mediaId/review', async (c) => {
             .fullJoin(profile, eq(review.userId, profile.userId))
             .fullJoin(media, eq(review.mediaId, media.id))
             .orderBy(desc(review.createdAt))
-            .limit(10)
+            .limit(limit)
+            .offset(offset)
         return c.json(req)
     } catch (error) {
         console.error(error);
@@ -91,6 +95,9 @@ mediaRoute.get('/:mediaId/review', async (c) => {
 
 mediaRoute.get('/review/:userID', async (c) => {
     try {
+        const limit = parseInt(c.req.query('limit') as string, 10) || 50;
+        const offset = parseInt(c.req.query('offset') as string, 10) || 0;
+
         const { userID } = await c.req.param()
         const r = await db.select({
             reviewComment: review.comment,
@@ -105,7 +112,8 @@ mediaRoute.get('/review/:userID', async (c) => {
             .fullJoin(profile, eq(review.userId, profile.userId))
             .fullJoin(media, eq(review.mediaId, media.id))
             .where(eq(review.userId, userID))
-            .limit(10)
+            .limit(limit)
+            .offset(offset)
         return c.json(r)
     } catch (error) {
         console.error(error);
