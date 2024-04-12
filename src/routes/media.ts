@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import db from "../db/db";
-import { desc, eq } from "drizzle-orm";
+import { count, desc, eq } from "drizzle-orm";
 import { media, review, profile } from "../db/schema";
 import { v4 as uuidv4 } from 'uuid';
 
@@ -116,6 +116,38 @@ mediaRoute.get('/review/:userID', async (c) => {
             .offset(offset)
         return c.json(r)
     } catch (error) {
+        console.error(error);
+        return c.json({ error: 'Internal server error' });
+    }
+})
+
+mediaRoute.get('/:mediaId/ratings', async (c) => {
+    try {
+        const { mediaId } = await c.req.param()
+        const ratings = await db.select({
+            rating: review.rating,
+            count: count(review.rating)
+        }).
+            from(review)
+            .where(eq(review.mediaId, mediaId))
+            .groupBy(review.rating)
+            .orderBy(desc(review.rating))
+
+        let totalRatings = 0;
+        let totalScore = 0;
+
+        ratings.forEach((ratingCount) => {
+            const rating = ratingCount.rating;
+            const count = ratingCount.count;
+            totalRatings += count;
+            totalScore += rating * count;
+        });
+
+        const averageRating = totalScore / totalRatings;
+
+        return c.json({ ratings, averageRating })
+    }
+    catch (error) {
         console.error(error);
         return c.json({ error: 'Internal server error' });
     }
