@@ -44,7 +44,7 @@ profileRoute.post('/:id', async (c) => {
 
 })
 
-profileRoute.post('/:id', async (c) => {
+profileRoute.put('/:id', async (c) => {
     try {
         const { id } = c.req.param()
         const username = c.req.query('username') as string

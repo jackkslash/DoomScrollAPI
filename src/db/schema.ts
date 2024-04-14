@@ -7,7 +7,6 @@ export const profile = pgTable('profile', {
     username: text('username').notNull(),
 });
 
-
 export const media = pgTable('media', {
     id: text('id').primaryKey(),
     title: text('title'),
@@ -18,13 +17,14 @@ export const media = pgTable('media', {
     thumbnails: jsonb('thumbnails'),
     tags: text('tags'),
     platform: text('platform'),
+    viewCount: integer('veiwCount').notNull().default(0),
     createdAt: timestamp("createdAt").notNull().default(sql`CURRENT_TIMESTAMP`)
 });
 
 export const review = pgTable('review', {
     id: uuid('id').primaryKey(),
     mediaId: text('mediaId').references(() => media.id).notNull(),
-    userId: text('userId').references(() => profile.userId).notNull(),
+    userId: uuid('userId').references(() => profile.userId).notNull(),
     rating: integer('rating').notNull(),
     comment: text('comment'),
     createdAt: timestamp("createdAt").notNull().default(sql`CURRENT_TIMESTAMP`)
