@@ -40,7 +40,8 @@ function processLink(link: string) {
                     channelId: channelId,
                     channelTitle: channelTitle,
                     platform: 'youtube',
-                    thumbnails: thumbnails
+                    thumbnails: thumbnails,
+                    viewCount: 0
                 }
                 await db.insert(media).values({
                     id: mediaObj.id,

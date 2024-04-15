@@ -7,6 +7,7 @@ export interface mediaObj {
     channelTitle: string;
     thumbnails?: Thumbnails;
     tags?: (string)[] | null;
+    viewCount: number;
     platform: string
 }
 

@@ -34,6 +34,10 @@ mediaRoute.get('/:id', async (c) => {
         })
         console.log(result)
 
+        await db.update(media).set({
+            viewCount: result!.viewCount + 1
+        }).where(eq(media.id, id))
+
         if (!result) {
             return c.json({ error: 'Resource not found' });
         }
