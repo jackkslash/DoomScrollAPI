@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import { Actions, mediaObj } from '../types'
+import { Actions, MediaItem } from '../types'
 import db from '../db/db'
 import { media } from '../db/schema'
 import { eq } from 'drizzle-orm'
@@ -26,13 +26,13 @@ function processLink(link: string) {
             } else {
                 const res = await fetch("https://youtube.googleapis.com/youtube/v3/videos?part=snippet%2CcontentDetails%2Cstatistics&id=" + videoID + "&key=" + process.env.YOUTUBE_APIKEY)
                 const body: any = await res.json();
-
+                console.log(body)
                 const { items } = body
                 const [firstItem] = items
                 const { id, snippet } = firstItem
                 const { title, description, channelId, channelTitle, publishedAt, thumbnails } = snippet
 
-                const mediaObj: mediaObj = {
+                const mediaObj: MediaItem = {
                     id: id,
                     title: title,
                     desc: description,
@@ -43,16 +43,7 @@ function processLink(link: string) {
                     thumbnails: thumbnails,
                     viewCount: 0
                 }
-                await db.insert(media).values({
-                    id: mediaObj.id,
-                    title: mediaObj.title,
-                    desc: mediaObj.desc,
-                    uploadDate: mediaObj.uploadDate,
-                    channelId: mediaObj.channelId,
-                    channelTitle: mediaObj.channelTitle,
-                    thumbnails: mediaObj.thumbnails,
-                    platform: mediaObj.platform
-                })
+                await db.insert(media).values(mediaObj)
                 return { existing: false, item: mediaObj }
             }
 

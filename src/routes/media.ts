@@ -3,6 +3,7 @@ import db from "../db/db";
 import { count, desc, eq } from "drizzle-orm";
 import { media, review, profile } from "../db/schema";
 import { v4 as uuidv4 } from 'uuid';
+import { ReviewItem } from "../types";
 
 
 export const mediaRoute = new Hono()
@@ -55,13 +56,14 @@ mediaRoute.post('/:mediaId/review', async (c) => {
         const { mediaId } = await c.req.param()
         const { r, rating, userID } = await c.req.json()
         console.log(mediaId, r, rating)
-        await db.insert(review).values({
+        const reviewObj: ReviewItem = {
             id: uuid,
             mediaId: mediaId,
             userId: userID,
             rating: rating,
-            comment: r
-        })
+            comment: r,
+        }
+        await db.insert(review).values(reviewObj)
         return c.json({ uuid, r, rating, mediaId })
     } catch (error) {
         console.error(error);

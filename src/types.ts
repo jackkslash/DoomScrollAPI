@@ -1,4 +1,4 @@
-export interface mediaObj {
+export interface MediaItem {
     id: string
     title: string
     desc: string
@@ -6,7 +6,6 @@ export interface mediaObj {
     channelId: string;
     channelTitle: string;
     thumbnails?: Thumbnails;
-    tags?: (string)[] | null;
     viewCount: number;
     platform: string
 }
@@ -28,5 +27,21 @@ export interface Metadata {
     height: number;
 }
 
+export interface ProfileItem {
+    id: string
+    userId: string
+    username: string
+}
 
+export interface ProfileUpdateItem {
+    username: string
+}
 
+export interface ReviewItem {
+    id: string
+    mediaId: string
+    userId: string
+    rating: number
+    comment: string
+    createdAt?: Date
+}
