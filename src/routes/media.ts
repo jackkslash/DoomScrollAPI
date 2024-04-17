@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import db from "../db/db";
-import { count, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq, gte } from "drizzle-orm";
 import { media, review, profile } from "../db/schema";
 import { v4 as uuidv4 } from 'uuid';
 import { ReviewItem } from "../types";
@@ -24,6 +24,31 @@ mediaRoute.get('/', async (c) => {
         console.error('Error fetching media:', error);
         c.status(500)
         return c.body('Internal Server Error')
+    }
+})
+
+mediaRoute.get('/most-reviewed', async (c) => {
+    try {
+        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+        const ratings = await db.select({
+            mediaID: media.id,
+            mediaTitle: media.title,
+            mediaDesc: media.desc,
+            count: count(media.id)
+        })
+            .from(review)
+            .fullJoin(media, eq(review.mediaId, media.id))
+            .where(gte(review.createdAt, twentyFourHoursAgo))
+            .groupBy(media.id)
+            .orderBy(desc(count(media.id)))
+            .limit(5)
+
+        return c.json(ratings)
+    }
+    catch (error) {
+        console.error(error);
+        return c.json({ error: 'Internal server error' });
     }
 })
 
@@ -158,3 +183,4 @@ mediaRoute.get('/:mediaId/ratings', async (c) => {
         return c.json({ error: 'Internal server error' });
     }
 })
+
