@@ -1,9 +1,9 @@
 import { Hono } from "hono";
 import db from "../db/db";
 import { and, count, desc, eq, gte } from "drizzle-orm";
-import { media, review, profile } from "../db/schema";
+import { media, review, profile, tracking } from "../db/schema";
 import { v4 as uuidv4 } from 'uuid';
-import { ReviewItem } from "../types";
+import { ReviewItem, TrackingItem, PageEnum } from "../types";
 
 
 export const mediaRoute = new Hono()
@@ -64,6 +64,15 @@ mediaRoute.get('/:id', async (c) => {
             viewCount: result!.viewCount + 1
         }).where(eq(media.id, id))
 
+        const trackingObj: TrackingItem = {
+            id: uuidv4(),
+            itemID: id,
+            page: PageEnum.MEDIA,
+            viewedAt: new Date()
+        }
+        await db.insert(tracking).values(trackingObj)
+
+
         if (!result) {
             return c.json({ error: 'Resource not found' });
         }
@@ -102,6 +111,16 @@ mediaRoute.get('/:mediaId/review', async (c) => {
         const offset = parseInt(c.req.query('offset') as string, 10) || 0;
 
         const { mediaId } = await c.req.param()
+
+        const trackingObj: TrackingItem = {
+            id: uuidv4(),
+            itemID: mediaId,
+            page: PageEnum.REVIEW,
+            viewedAt: new Date()
+        }
+        await db.insert(tracking).values(trackingObj)
+
+
         const req = await db.select({
             reviewComment: review.comment,
             reviewRating: review.rating,

@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, jsonb, timestamp, integer, uuid } from "drizzle-orm/pg-core";
+import { pgTable, text, jsonb, timestamp, integer, uuid, pgEnum } from "drizzle-orm/pg-core";
 
 export const profile = pgTable('profile', {
     id: uuid('id').primaryKey(),
@@ -28,4 +28,13 @@ export const review = pgTable('review', {
     rating: integer('rating').notNull(),
     comment: text('comment'),
     createdAt: timestamp("createdAt").notNull().default(sql`CURRENT_TIMESTAMP`)
+});
+
+export const pageEnum = pgEnum('page', ['MEDIA', 'REVIEW', 'PROFILE']);
+
+export const tracking = pgTable('tracking', {
+    id: uuid('id').primaryKey(),
+    itemID: text('itemID').notNull(),
+    page: pageEnum('page').notNull(),
+    viewedAt: timestamp("viewedAt").notNull().default(sql`CURRENT_TIMESTAMP`),
 });

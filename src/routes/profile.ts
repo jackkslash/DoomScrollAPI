@@ -1,9 +1,9 @@
 import { Hono } from "hono";
-import { profile } from "../db/schema";
+import { profile, tracking } from "../db/schema";
 import { eq } from "drizzle-orm";
 import db from "../db/db";
 import { v4 as uuidv4 } from 'uuid';
-import { ProfileItem, ProfileUpdateItem } from "../types";
+import { PageEnum, ProfileItem, ProfileUpdateItem, TrackingItem } from "../types";
 
 export const profileRoute = new Hono()
 
@@ -14,6 +14,14 @@ profileRoute.get('/:id', async (c) => {
             where: eq(profile.userId, id)
         })
         console.log(result)
+        const trackingObj: TrackingItem = {
+            id: uuidv4(),
+            itemID: id,
+            page: PageEnum.PROFILE,
+            viewedAt: new Date()
+        }
+        await db.insert(tracking).values(trackingObj)
+
 
         if (!result) {
             return c.json({ error: 'Resource not found' });

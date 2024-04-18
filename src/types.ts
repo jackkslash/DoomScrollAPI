@@ -45,3 +45,16 @@ export interface ReviewItem {
     comment: string
     createdAt?: Date
 }
+
+export enum PageEnum {
+    MEDIA = 'MEDIA',
+    REVIEW = 'REVIEW',
+    PROFILE = 'PROFILE'
+}
+
+export interface TrackingItem {
+    id: string
+    itemID: string
+    page: PageEnum
+    viewedAt: Date
+}
