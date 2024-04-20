@@ -27,56 +27,6 @@ mediaRoute.get('/', async (c) => {
     }
 })
 
-mediaRoute.get('/most-reviewed', async (c) => {
-    try {
-        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-
-        const ratings = await db.select({
-            mediaID: media.id,
-            mediaTitle: media.title,
-            mediaDesc: media.desc,
-            count: count(media.id)
-        })
-            .from(review)
-            .fullJoin(media, eq(review.mediaId, media.id))
-            .where(gte(review.createdAt, twentyFourHoursAgo))
-            .groupBy(media.id)
-            .orderBy(desc(count(media.id)))
-            .limit(5)
-
-        return c.json(ratings)
-    }
-    catch (error) {
-        console.error(error);
-        return c.json({ error: 'Internal server error' });
-    }
-})
-
-mediaRoute.get('/most-viewed', async (c) => {
-    try {
-        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-
-        const mv = await db.select({
-            mediaID: media.id,
-            mediaTitle: media.title,
-            mediaDesc: media.desc,
-            count: count(media.id)
-        })
-            .from(tracking)
-            .where(and(eq(tracking.page, PageEnum.MEDIA), gte(tracking.viewedAt, twentyFourHoursAgo)))
-            .fullJoin(media, eq(tracking.itemID, media.id))
-            .groupBy(media.id)
-            .orderBy(desc(count(tracking.itemID)))
-            .limit(5)
-
-        return c.json(mv)
-    }
-    catch (error) {
-        console.error(error);
-        return c.json({ error: 'Internal server error' });
-    }
-})
-
 mediaRoute.get('/:id', async (c) => {
     try {
         const { id } = c.req.param()
@@ -162,34 +112,6 @@ mediaRoute.get('/:mediaId/review', async (c) => {
             .limit(limit)
             .offset(offset)
         return c.json(req)
-    } catch (error) {
-        console.error(error);
-        return c.json({ error: 'Internal server error' });
-    }
-})
-
-mediaRoute.get('/review/:userID', async (c) => {
-    try {
-        const limit = parseInt(c.req.query('limit') as string, 10) || 50;
-        const offset = parseInt(c.req.query('offset') as string, 10) || 0;
-
-        const { userID } = await c.req.param()
-        const r = await db.select({
-            reviewComment: review.comment,
-            reviewRating: review.rating,
-            reviewDate: review.createdAt,
-            profileUsername: profile.username,
-            profileID: profile.userId,
-            mediaTitle: media.title,
-            mediaDesc: media.desc,
-        })
-            .from(review)
-            .fullJoin(profile, eq(review.userId, profile.userId))
-            .fullJoin(media, eq(review.mediaId, media.id))
-            .where(eq(review.userId, userID))
-            .limit(limit)
-            .offset(offset)
-        return c.json(r)
     } catch (error) {
         console.error(error);
         return c.json({ error: 'Internal server error' });
