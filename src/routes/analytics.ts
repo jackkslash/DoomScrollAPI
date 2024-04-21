@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import db from "../db/db";
 import { and, count, desc, eq, gte } from "drizzle-orm";
-import { media, review, tracking } from "../db/schema";
+import { media, profile, review, tracking } from "../db/schema";
 
 import { PageEnum } from "../types";
 
@@ -49,6 +49,30 @@ analyticsRoute.get('/most-viewed', async (c) => {
             .fullJoin(media, eq(tracking.itemID, media.id))
             .groupBy(media.id)
             .orderBy(desc(count(tracking.itemID)))
+            .limit(5)
+
+        return c.json(mv)
+    }
+    catch (error) {
+        console.error(error);
+        return c.json({ error: 'Internal server error' });
+    }
+})
+
+analyticsRoute.get('/most-viewed-profile', async (c) => {
+    try {
+        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+        const mv = await db.select({
+            profileID: profile.id,
+            profileUsername: profile.username,
+            count: count(profile.id)
+        })
+            .from(tracking)
+            .where(and(eq(tracking.page, PageEnum.PROFILE), gte(tracking.viewedAt, twentyFourHoursAgo)))
+            .fullJoin(profile, eq(tracking.itemID, profile.id))
+            .groupBy(profile.id)
+            .orderBy(desc(count(profile.id)))
             .limit(5)
 
         return c.json(mv)
