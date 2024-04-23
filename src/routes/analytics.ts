@@ -11,6 +11,8 @@ export const analyticsRoute = new Hono()
 
 analyticsRoute.get('/most-reviewed', async (c) => {
     try {
+        const limit = parseInt(c.req.query('limit') as string, 10) || 50;
+        const offset = parseInt(c.req.query('offset') as string, 10) || 0;
         const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
         const ratings = await db.select({
@@ -24,7 +26,8 @@ analyticsRoute.get('/most-reviewed', async (c) => {
             .where(gte(review.createdAt, twentyFourHoursAgo))
             .groupBy(media.id)
             .orderBy(desc(count(media.id)))
-            .limit(5)
+            .limit(limit)
+            .offset(offset)
 
         return c.json(ratings)
     }
@@ -36,6 +39,8 @@ analyticsRoute.get('/most-reviewed', async (c) => {
 
 analyticsRoute.get('/most-viewed', async (c) => {
     try {
+        const limit = parseInt(c.req.query('limit') as string, 10) || 50;
+        const offset = parseInt(c.req.query('offset') as string, 10) || 0;
         const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
         const mv = await db.select({
@@ -49,7 +54,8 @@ analyticsRoute.get('/most-viewed', async (c) => {
             .fullJoin(media, eq(tracking.itemID, media.id))
             .groupBy(media.id)
             .orderBy(desc(count(tracking.itemID)))
-            .limit(5)
+            .limit(limit)
+            .offset(offset)
 
         return c.json(mv)
     }
@@ -61,6 +67,8 @@ analyticsRoute.get('/most-viewed', async (c) => {
 
 analyticsRoute.get('/most-viewed-profile', async (c) => {
     try {
+        const limit = parseInt(c.req.query('limit') as string, 10) || 50;
+        const offset = parseInt(c.req.query('offset') as string, 10) || 0;
         const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
         const mv = await db.select({
@@ -73,7 +81,8 @@ analyticsRoute.get('/most-viewed-profile', async (c) => {
             .fullJoin(profile, eq(tracking.itemID, profile.id))
             .groupBy(profile.id)
             .orderBy(desc(count(profile.id)))
-            .limit(5)
+            .limit(limit)
+            .offset(offset)
 
         return c.json(mv)
     }
